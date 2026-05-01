@@ -27,7 +27,7 @@ export interface ExtractResult {
   wallTimeMs: number;
 }
 
-const STRATEGIES: Record<string, any> = {
+export const STRATEGIES: Record<string, any> = {
   zero_shot: zeroShotStrategy,
   few_shot: fewShotStrategy,
   cot: cotStrategy,

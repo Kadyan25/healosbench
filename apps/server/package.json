@@ -17,6 +17,7 @@
     "@healosbench/shared": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.1",
     "fastest-levenshtein": "^1.0.16",
     "hono": "^4.8.2",
     "zod": "catalog:"

@@ -49,7 +49,11 @@ export const caseResults = pgTable(
     updated_at: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex("case_results_idempotency_idx").on(
+    uniqueIndex("case_results_run_transcript_idx").on(
+      table.run_id,
+      table.transcript_id,
+    ),
+    index("case_results_idempotency_idx").on(
       table.strategy_hash,
       table.transcript_id,
     ),
