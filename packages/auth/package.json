@@ -1,0 +1,24 @@
+{
+  "name": "@healosbench/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@healosbench/db": "workspace:*",
+    "@healosbench/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@healosbench/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
