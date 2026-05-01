@@ -295,13 +295,18 @@ export async function getRun(runId: string) {
       case_results: {
         with: {
           metrics: true,
+          attempts: true,
         }
       }
     }
   });
 
   if (!run) throw new Error("Run not found");
-  
-  // Aggregate F1 logic here could be added, but returning the raw data is fine for now
   return run;
+}
+
+export async function listRuns() {
+  return db.query.runs.findMany({
+    orderBy: (runs, { desc }) => [desc(runs.started_at)],
+  });
 }

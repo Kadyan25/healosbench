@@ -1,10 +1,18 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { stream } from "hono/streaming";
-import { startRun, resumeRun, getRun } from "../services/runner.service.js";
+import { startRun, resumeRun, getRun, listRuns } from "../services/runner.service.js";
 import { runEvents } from "../utils/events.js";
 import type { Strategy } from "@healosbench/shared";
 
 export const runsRouter = new Hono();
+
+runsRouter.use("/*", cors({ origin: "http://localhost:3002", credentials: true }));
+
+runsRouter.get("/", async (c) => {
+  const allRuns = await listRuns();
+  return c.json(allRuns);
+});
 
 runsRouter.post("/", async (c) => {
   const body = await c.req.json();
