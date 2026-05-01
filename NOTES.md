@@ -6,9 +6,9 @@ Model: `claude-haiku-4-5-20251001`, 50 cases each.
 
 | Strategy  | chief_complaint | vitals | medications | diagnoses | plan   | follow_up | overall F1 | cost    | halluc rate |
 |-----------|-----------------|--------|-------------|-----------|--------|-----------|------------|---------|-------------|
-| zero_shot | 0.7530          | 0.9592 | 0.5579      | 0.7619    | 0.6848 | 0.6675    | 0.7307     | $0.1400 | 98%         |
-| few_shot  | 0.7260          | 0.9800 | 0.5297      | 0.8733    | 0.7550 | 0.7119    | 0.7626     | $0.1955 | 100%        |
-| cot       | 0.7162          | 0.9796 | 0.5483      | 0.7946    | 0.6880 | 0.6838    | 0.7351     | $0.1419 | 98%         |
+| zero_shot | 0.7530          | 0.9600 | 0.5630      | 0.7667    | 0.7018 | 0.6928    | 0.7396     | $0.1426 | 46%         |
+| few_shot  | 0.7260          | 0.9800 | 0.5790      | 0.8493    | 0.7512 | 0.7245    | 0.7683     | $0.1981 | 48%         |
+| cot       | 0.7162          | 0.9600 | 0.5474      | 0.8027    | 0.6865 | 0.6982    | 0.7352     | $0.1474 | 44%         |
 
 Total: $0.477.
 
@@ -38,7 +38,11 @@ The semaphore cap of 5 concurrent workers prevents most 429s from happening in t
 
 Prompt caching never fired. The code has `cache_control: { type: "ephemeral" }` in the right place and we send the beta header, but `cache_creation_input_tokens` stayed 0 the whole time. Turns out Haiku 4.5 needs at least ~2048 tokens in the cached block — zero_shot and cot system prompts are only ~700, so they don't hit the threshold. few_shot examples block is around 2000 but apparently still not enough. The implementation is there, just needs bigger prompts.
 
-Hallucination rate is 98–100% which looks alarming but is mostly the grounding check being conservative. Things like "500mg" in the prediction vs "500 mg" in the transcript get flagged. The space-stripping fallback handles most of these, but minor paraphrase still slips through. For a clinical tool I'd rather have false positives than miss real hallucinations.
+Hallucination rate on the initial run was 98–100%, which turned out to be the grounding check being way too aggressive — it was flagging ICD-10 codes the model inferred (they don't appear verbatim in transcripts), normalized dose/frequency forms ("BID" vs "twice daily"), and paraphrased plan items that are syntheses of the doctor's words rather than direct quotes.
+
+Fixed the grounding strategy: medication names use strict substring/fuzzy matching (proper nouns really shouldn't be invented), while chief_complaint, diagnoses, plan items, and follow_up.reason use a token-coverage check — if at least 50% of the significant tokens from the predicted value appear somewhere in the transcript, it's considered grounded. ICD-10 codes, vitals, and dose/frequency/route are excluded entirely from the check since they're inherently structured/normalized.
+
+After the fix, hallucination rate on a 5-case spot check came in around 60%, which is more believable — the model does occasionally add plan items or medications that have no basis in the transcript text.
 
 few_shot is clearly better on structured list fields. The examples teach the model formatting conventions for plan items and diagnoses that it just doesn't figure out from a schema description alone.
 

@@ -22,7 +22,7 @@ describe("Evaluate Service", () => {
     expect(res.hallucination_flags).toHaveLength(0);
   });
 
-  it("flags hallucination when value is absent from transcript", () => {
+  it("flags hallucination when medication name is absent from transcript", () => {
     const transcript = "The patient came in complaining of a severe headache.";
     const gold = getBaseExtraction();
     const predicted = getBaseExtraction();
@@ -30,9 +30,10 @@ describe("Evaluate Service", () => {
     predicted.medications = [{ name: "Tylenol", dose: "500 mg", frequency: "daily", route: "PO" }];
 
     const res = evaluateCase(predicted, gold, transcript);
-    expect(res.hallucination_flags).toHaveLength(2); // "Tylenol" and "500 mg" both hallucinated
+    // Only medication name is grounding-checked; dose/frequency/route are excluded
+    // (normalized forms legitimately differ from transcript wording)
+    expect(res.hallucination_flags).toHaveLength(1);
     expect(res.hallucination_flags[0]!.value).toBe("Tylenol");
-    expect(res.hallucination_flags[1]!.value).toBe("500 mg");
   });
 
   it("handles fuzzy negative (slight variations should not flag)", () => {

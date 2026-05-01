@@ -16,7 +16,8 @@ export default function RunDetailClient({ runId, initialStatus, initialCases }: 
 
   useEffect(() => {
     if (initialStatus !== "running") return;
-    const es = new EventSource(`http://localhost:3001/api/v1/runs/${runId}/events`);
+    const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
+    const es = new EventSource(`${base}/api/v1/runs/${runId}/events`);
     esRef.current = es;
 
     es.addEventListener("case_completed", (e: MessageEvent) => {
