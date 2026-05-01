@@ -3,7 +3,6 @@ import { resolve } from "path";
 config({ path: resolve(process.cwd(), "./apps/server/.env") });
 import { extract } from "../src/index.js";
 import { readFileSync } from "fs";
-import { resolve } from "path";
 
 async function main() {
   const transcriptPath = resolve(process.cwd(), "./data/transcripts/case_001.txt");
