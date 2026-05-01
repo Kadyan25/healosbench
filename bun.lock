@@ -22,6 +22,7 @@
         "@healosbench/auth": "workspace:*",
         "@healosbench/db": "workspace:*",
         "@healosbench/env": "workspace:*",
+        "@healosbench/shared": "workspace:*",
         "better-auth": "catalog:",
         "dotenv": "catalog:",
         "hono": "^4.8.2",
@@ -104,6 +105,18 @@
         "@t3-oss/env-core": "^0.13.1",
         "@t3-oss/env-nextjs": "^0.13.1",
         "dotenv": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@healosbench/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/shared": {
+      "name": "@healosbench/shared",
+      "version": "0.0.0",
+      "dependencies": {
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -320,6 +333,8 @@
     "@healosbench/db": ["@healosbench/db@workspace:packages/db"],
 
     "@healosbench/env": ["@healosbench/env@workspace:packages/env"],
+
+    "@healosbench/shared": ["@healosbench/shared@workspace:packages/shared"],
 
     "@healosbench/ui": ["@healosbench/ui@workspace:packages/ui"],
 
