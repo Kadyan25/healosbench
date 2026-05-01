@@ -1,0 +1,25 @@
+{
+  "name": "@healosbench/llm",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.0",
+    "@healosbench/shared": "workspace:*",
+    "zod": "catalog:",
+    "zod-to-json-schema": "^3.24.1"
+  },
+  "devDependencies": {
+    "@healosbench/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  }
+}

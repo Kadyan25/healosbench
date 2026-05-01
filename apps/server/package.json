@@ -13,6 +13,7 @@
     "@healosbench/auth": "workspace:*",
     "@healosbench/db": "workspace:*",
     "@healosbench/env": "workspace:*",
+    "@healosbench/llm": "workspace:*",
     "@healosbench/shared": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
