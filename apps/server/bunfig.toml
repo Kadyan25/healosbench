@@ -1,0 +1,3 @@
+[test]
+# Only run source TypeScript tests, not compiled dist/ artifacts
+root = "./src"

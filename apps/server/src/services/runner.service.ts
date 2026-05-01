@@ -168,17 +168,17 @@ async function processPendingCases(runId: string, force: boolean) {
 
         // Accumulate tokens on Run
         if (result.tokens) {
-          const addedCost = estimateCost(result.tokens);
-          await db
-            .update(runs)
-            .set({
-              input_tokens: sql`${runs.input_tokens} + ${result.tokens.input_tokens}`,
-              output_tokens: sql`${runs.output_tokens} + ${result.tokens.output_tokens}`,
-              cache_read_tokens: sql`${runs.cache_read_tokens} + ${result.tokens.cache_read_input_tokens || 0}`,
-              cache_write_tokens: sql`${runs.cache_write_tokens} + ${result.tokens.cache_creation_input_tokens || 0}`,
-              cost_usd: sql`${runs.cost_usd} + ${addedCost}`,
-            })
-            .where(eq(runs.id, runId));
+          const t = result.tokens;
+          const addedCost = estimateCost(t);
+          await db.execute(
+            sql`UPDATE runs SET
+              input_tokens = input_tokens + ${t.input_tokens},
+              output_tokens = output_tokens + ${t.output_tokens},
+              cache_read_tokens = cache_read_tokens + ${t.cache_read_input_tokens ?? 0},
+              cache_write_tokens = cache_write_tokens + ${t.cache_creation_input_tokens ?? 0},
+              cost_usd = cost_usd + ${addedCost}
+            WHERE id = ${runId}`
+          );
         }
 
         runEvents.emit(`case_completed:${runId}`, {
