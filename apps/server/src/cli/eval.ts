@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { parseArgs } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -10,7 +11,7 @@ async function main() {
     args: process.argv.slice(2),
     options: {
       strategy: { type: "string" },
-      model: { type: "string", default: "claude-3-haiku-20240307" },
+      model: { type: "string", default: "claude-haiku-4-5-20251001" },
       limit: { type: "string" },
       force: { type: "boolean", default: false },
     },

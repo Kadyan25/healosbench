@@ -1,3 +1,5 @@
+import type { Strategy } from "@healosbench/shared";
+
 /**
  * Cost calculation for Anthropic claude-haiku-4-5-20251001
  * Pricing per 1M tokens.
@@ -14,6 +16,42 @@ export interface TokenCounts {
   output_tokens: number;
   cache_creation_input_tokens: number | null;
   cache_read_input_tokens: number | null;
+}
+
+// Cached tokens per strategy: system prompt + optional examples block
+const CACHED_TOKENS: Record<Strategy, number> = {
+  zero_shot: 700,
+  few_shot: 2700,
+  cot: 700,
+};
+
+// Expected output tokens per call (tool JSON + optional scratchpad)
+const OUTPUT_TOKENS: Record<Strategy, number> = {
+  zero_shot: 400,
+  few_shot: 400,
+  cot: 700,
+};
+
+const AVG_TRANSCRIPT_TOKENS = 500;
+
+export interface RunCostEstimate {
+  low: number;
+  mid: number;
+  high: number;
+}
+
+export function estimateRunCost(opts: { caseCount: number; strategy: Strategy }): RunCostEstimate {
+  const { caseCount, strategy } = opts;
+  const cached = CACHED_TOKENS[strategy];
+  const output = OUTPUT_TOKENS[strategy];
+
+  const cacheWriteCost = (cached / 1_000_000) * HAIKU_4_5_PRICING.cache_write;
+  const cacheReadCost = (cached / 1_000_000) * HAIKU_4_5_PRICING.cache_read * Math.max(0, caseCount - 1);
+  const freshInputCost = (AVG_TRANSCRIPT_TOKENS / 1_000_000) * HAIKU_4_5_PRICING.input * caseCount;
+  const outputCost = (output / 1_000_000) * HAIKU_4_5_PRICING.output * caseCount;
+
+  const mid = cacheWriteCost + cacheReadCost + freshInputCost + outputCost;
+  return { low: mid * 0.8, mid, high: mid * 1.3 };
 }
 
 export function estimateCost(tokens: TokenCounts): number {

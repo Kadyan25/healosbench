@@ -1,6 +1,6 @@
 import { db } from "@healosbench/db";
 import { runs, caseResults, attempts, metricsPerField } from "@healosbench/db/schema/eval";
-import { extract, getPromptHash, STRATEGIES, estimateCost } from "@healosbench/llm";
+import { extract, getPromptHash, STRATEGIES, estimateCost, estimateRunCost } from "@healosbench/llm";
 import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { Semaphore } from "../utils/semaphore.js";
@@ -73,6 +73,22 @@ async function processPendingCases(runId: string, force: boolean) {
                 updated_at: new Date(),
               })
               .where(eq(caseResults.id, caseRow.id));
+
+            // Also copy metrics_per_field rows from the existing case
+            const existingMetrics = await db.query.metricsPerField.findMany({
+              where: eq(metricsPerField.case_result_id, existing.id),
+            });
+            if (existingMetrics.length > 0) {
+              await db.insert(metricsPerField).values(
+                existingMetrics.map((m) => ({
+                  id: randomUUID(),
+                  case_result_id: caseRow.id,
+                  field_name: m.field_name,
+                  score: m.score,
+                  details: m.details,
+                }))
+              );
+            }
 
             runEvents.emit(`case_completed:${runId}`, {
               caseId: caseRow.id,
@@ -241,6 +257,23 @@ export async function startRun(opts: StartRunOpts): Promise<{ run_id: string }> 
   const promptHash = getPromptHash(STRATEGIES[opts.strategy]);
   const strategyHash = getStrategyHash(opts.strategy, opts.model, promptHash);
 
+  const dataset = await listCases();
+  const casesToRun = opts.limit ? dataset.slice(0, opts.limit) : dataset;
+
+  // Pre-flight cost estimate — refuse if mid exceeds cap
+  const costCapUsd = parseFloat(process.env["COST_CAP_USD"] ?? "1.50");
+  const estimate = estimateRunCost({ caseCount: casesToRun.length, strategy: opts.strategy });
+  console.log(
+    `Cost estimate for ${opts.strategy} × ${casesToRun.length} cases: ` +
+    `low=$${estimate.low.toFixed(4)} mid=$${estimate.mid.toFixed(4)} high=$${estimate.high.toFixed(4)} ` +
+    `(cap=$${costCapUsd})`
+  );
+  if (estimate.mid > costCapUsd) {
+    throw new Error(
+      `Estimated cost $${estimate.mid.toFixed(4)} exceeds COST_CAP_USD $${costCapUsd}. Aborting.`
+    );
+  }
+
   await db.insert(runs).values({
     id: runId,
     strategy: opts.strategy,
@@ -253,9 +286,6 @@ export async function startRun(opts: StartRunOpts): Promise<{ run_id: string }> 
     cache_write_tokens: 0,
     cost_usd: "0",
   });
-
-  const dataset = await listCases();
-  const casesToRun = opts.limit ? dataset.slice(0, opts.limit) : dataset;
 
   await db.insert(caseResults).values(
     casesToRun.map((c) => ({

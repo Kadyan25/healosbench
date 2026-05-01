@@ -171,6 +171,7 @@ export async function extract(
     try {
       response = await client.messages.create(requestPayload, {
         signal: opts?.signal,
+        headers: { "anthropic-beta": "prompt-caching-2024-07-31" },
       });
     } catch (err) {
       // Collect basic failure info
@@ -204,7 +205,9 @@ export async function extract(
       if (parseResult.success) {
         extraction = parseResult.data;
       } else {
-        validation_errors = (parseResult.error as any).errors.map((e: any) => `${e.path.join('.')}: ${e.message}`);
+        // Zod v4 uses .issues; fall back to .errors for compat
+        const issues = (parseResult.error as any).issues ?? (parseResult.error as any).errors ?? [];
+        validation_errors = issues.map((e: any) => `${e.path.join('.')}: ${e.message}`);
       }
     } else {
       validation_errors = ["Model did not call the extract_clinical_data tool."];
@@ -221,12 +224,27 @@ export async function extract(
       break; // Success
     }
 
-    // Prepare retry
+    // Prepare retry — if the model made a tool call, we MUST include a tool_result
+    // before any further user content or the API returns 400.
     messages.push({ role: "assistant", content: response.content });
-    messages.push({
-      role: "user",
-      content: `Your previous output failed validation:\n${validation_errors?.join('\n')}\nPlease correct and call the tool again.`
-    });
+    if (toolCall) {
+      messages.push({
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: toolCall.id,
+            content: `Validation failed: ${validation_errors?.join("; ")}. Please correct the extraction and call the tool again.`,
+            is_error: true,
+          } as any,
+        ],
+      });
+    } else {
+      messages.push({
+        role: "user",
+        content: `Your previous output failed validation:\n${validation_errors?.join("\n")}\nPlease correct and call the tool again.`,
+      });
+    }
   }
 
   return {

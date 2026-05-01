@@ -29,7 +29,7 @@
     "check-types": "turbo check-types",
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
-    "eval": "bun run --cwd apps/server eval",
+    "eval": "bun run --env-file .env --cwd apps/server src/cli/eval.ts",
     "db:push": "turbo -F @healosbench/db db:push",
     "db:studio": "turbo -F @healosbench/db db:studio",
     "db:generate": "turbo -F @healosbench/db db:generate",
