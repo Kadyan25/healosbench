@@ -118,12 +118,12 @@ All three use Anthropic tool use (`tool_choice: { type: "tool" }`) — no `JSON.
 
 All three strategies on 50 cases with `claude-haiku-4-5-20251001`. Full JSON in `results/`.
 
-| Strategy  | overall F1 | cost    |
-|-----------|------------|---------|
-| zero_shot | 0.7307     | $0.1400 |
-| few_shot  | 0.7626     | $0.1955 |
-| cot       | 0.7351     | $0.1419 |
-| **total** |            | **$0.477** |
+| Strategy  | overall F1 | halluc rate | cost    |
+|-----------|------------|-------------|---------|
+| zero_shot | 0.7396     | 46%         | $0.1426 |
+| few_shot  | 0.7683     | 48%         | $0.1981 |
+| cot       | 0.7352     | 44%         | $0.1474 |
+| **total** |            |             | **$0.488** |
 
 See `NOTES.md` for per-field breakdown and analysis.
 
