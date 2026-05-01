@@ -1,0 +1,173 @@
+{
+  "id": "94b7dca8-2bb5-441e-ae6f-8c7796665589",
+  "strategy": "zero_shot",
+  "model": "claude-3-haiku-20240307",
+  "prompt_hash": "502952a683408d5fd3eac4c660d28a2f03700ae01d0975f32cf89451ca1309de",
+  "status": "done",
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cache_read_tokens": 0,
+  "cache_write_tokens": 0,
+  "cost_usd": "0.000000",
+  "started_at": "2026-05-01T05:59:49.092Z",
+  "finished_at": "2026-05-01T05:59:49.585Z",
+  "error": null,
+  "case_results": [
+    {
+      "id": "dedd69a8-8d28-4ae5-bdb4-1e934c6803b4",
+      "run_id": "94b7dca8-2bb5-441e-ae6f-8c7796665589",
+      "transcript_id": "case_003",
+      "strategy_hash": "f9b970ddddd2df3dabc3192faeec9d5b70a1be33d8283bf5e8ec075ebf542709",
+      "status": "failed",
+      "prediction": null,
+      "gold": {
+        "plan": [
+          "rapid strep test at the lab today",
+          "start penicillin V 500 mg four times a day for 10 days if positive",
+          "acetaminophen 500 mg every 6 hours as needed for pain",
+          "warm salt water gargles and rest",
+          "message if not improving in 3 days on antibiotics"
+        ],
+        "vitals": {
+          "bp": null,
+          "hr": null,
+          "spo2": null,
+          "temp_f": null
+        },
+        "diagnoses": [
+          {
+            "icd10": "J02.0",
+            "description": "suspected streptococcal pharyngitis"
+          }
+        ],
+        "follow_up": {
+          "reason": null,
+          "interval_days": null
+        },
+        "medications": [
+          {
+            "dose": "500 mg",
+            "name": "penicillin V",
+            "route": "PO",
+            "frequency": "four times a day"
+          },
+          {
+            "dose": "500 mg",
+            "name": "acetaminophen",
+            "route": "PO",
+            "frequency": "every 6 hours as needed"
+          }
+        ],
+        "chief_complaint": "severe sore throat with difficulty swallowing"
+      },
+      "scores": null,
+      "hallucination_flags": [],
+      "hallucination_count": 0,
+      "schema_failed": false,
+      "created_at": "2026-05-01T05:59:49.118Z",
+      "updated_at": "2026-05-01T05:59:49.483Z",
+      "metrics": []
+    },
+    {
+      "id": "a1464dd6-ffad-4e8d-8154-f272a032c105",
+      "run_id": "94b7dca8-2bb5-441e-ae6f-8c7796665589",
+      "transcript_id": "case_002",
+      "strategy_hash": "f9b970ddddd2df3dabc3192faeec9d5b70a1be33d8283bf5e8ec075ebf542709",
+      "status": "failed",
+      "prediction": null,
+      "gold": {
+        "plan": [
+          "start amoxicillin-clavulanate 875 mg twice daily for 7 days",
+          "saline nasal rinse twice a day",
+          "pseudoephedrine 30 mg every 6 hours as needed for congestion",
+          "call if not significantly better in 5 days"
+        ],
+        "vitals": {
+          "bp": "118/76",
+          "hr": 82,
+          "spo2": 97,
+          "temp_f": 101.2
+        },
+        "diagnoses": [
+          {
+            "icd10": "J01.90",
+            "description": "acute bacterial sinusitis"
+          }
+        ],
+        "follow_up": {
+          "reason": "call if not improving in 5 days",
+          "interval_days": null
+        },
+        "medications": [
+          {
+            "dose": "875 mg",
+            "name": "amoxicillin-clavulanate",
+            "route": "PO",
+            "frequency": "twice daily"
+          },
+          {
+            "dose": "30 mg",
+            "name": "pseudoephedrine",
+            "route": "PO",
+            "frequency": "every 6 hours"
+          }
+        ],
+        "chief_complaint": "facial pressure and purulent nasal discharge for ten days"
+      },
+      "scores": null,
+      "hallucination_flags": [],
+      "hallucination_count": 0,
+      "schema_failed": false,
+      "created_at": "2026-05-01T05:59:49.118Z",
+      "updated_at": "2026-05-01T05:59:49.572Z",
+      "metrics": []
+    },
+    {
+      "id": "8a95b838-d346-4017-a2fc-8b021487ba06",
+      "run_id": "94b7dca8-2bb5-441e-ae6f-8c7796665589",
+      "transcript_id": "case_001",
+      "strategy_hash": "f9b970ddddd2df3dabc3192faeec9d5b70a1be33d8283bf5e8ec075ebf542709",
+      "status": "failed",
+      "prediction": null,
+      "gold": {
+        "plan": [
+          "supportive care with fluids and saline nasal spray",
+          "ibuprofen 400 mg every 6 hours as needed for pain and fever",
+          "call if not improving in 7 days or fever above 102"
+        ],
+        "vitals": {
+          "bp": "122/78",
+          "hr": 88,
+          "spo2": 98,
+          "temp_f": 100.4
+        },
+        "diagnoses": [
+          {
+            "icd10": "J06.9",
+            "description": "viral upper respiratory infection"
+          }
+        ],
+        "follow_up": {
+          "reason": "return only if symptoms worsen",
+          "interval_days": null
+        },
+        "medications": [
+          {
+            "dose": "400 mg",
+            "name": "ibuprofen",
+            "route": "PO",
+            "frequency": "every 6 hours as needed"
+          }
+        ],
+        "chief_complaint": "sore throat and nasal congestion for four days"
+      },
+      "scores": null,
+      "hallucination_flags": [],
+      "hallucination_count": 0,
+      "schema_failed": false,
+      "created_at": "2026-05-01T05:59:49.118Z",
+      "updated_at": "2026-05-01T05:59:49.574Z",
+      "metrics": []
+    }
+  ]
+}

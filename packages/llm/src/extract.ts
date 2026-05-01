@@ -1,5 +1,5 @@
 import { Anthropic } from "@anthropic-ai/sdk";
-import { zodToJsonSchema } from "zod-to-json-schema";
+
 import { ClinicalExtractionSchema } from "@healosbench/shared";
 import type { ClinicalExtraction, Strategy } from "@healosbench/shared";
 import type { TokenCounts } from "./cost.js";
@@ -43,7 +43,7 @@ export async function extract(
   if (!strategy) throw new Error(`Unknown strategy: ${strategyId}`);
 
   const promptHash = getPromptHash(strategy);
-  const model = opts?.model ?? "claude-3-5-haiku-20241022"; // claude-haiku-4-5-20251001 doesn't exist, using standard haiku
+  const model = opts?.model ?? "claude-3-haiku-20240307";
 
   // Prepare system prompt
   const systemBlocks: Array<Anthropic.TextBlockParam> = [];
@@ -72,7 +72,64 @@ export async function extract(
     });
   }
 
-  const toolSchema = zodToJsonSchema(ClinicalExtractionSchema as any, "ClinicalExtraction");
+  const toolSchema = {
+    type: "object",
+    properties: {
+      chief_complaint: { type: "string" },
+      vitals: {
+        type: "object",
+        properties: {
+          bp: { type: ["string", "null"] },
+          hr: { type: ["integer", "null"] },
+          temp_f: { type: ["number", "null"] },
+          spo2: { type: ["integer", "null"] },
+        },
+        required: ["bp", "hr", "temp_f", "spo2"],
+        additionalProperties: false,
+      },
+      medications: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            dose: { type: ["string", "null"] },
+            frequency: { type: ["string", "null"] },
+            route: { type: ["string", "null"] },
+          },
+          required: ["name", "dose", "frequency", "route"],
+          additionalProperties: false,
+        },
+      },
+      diagnoses: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            description: { type: "string" },
+            icd10: { type: "string" },
+          },
+          required: ["description"],
+          additionalProperties: false,
+        },
+      },
+      plan: {
+        type: "array",
+        items: { type: "string" },
+      },
+      follow_up: {
+        type: "object",
+        properties: {
+          interval_days: { type: ["integer", "null"] },
+          reason: { type: ["string", "null"] },
+        },
+        required: ["interval_days", "reason"],
+        additionalProperties: false,
+      },
+    },
+    required: ["chief_complaint", "vitals", "medications", "diagnoses", "plan", "follow_up"],
+    additionalProperties: false,
+  };
   
   // Create user message
   const userText = strategy.userTemplate

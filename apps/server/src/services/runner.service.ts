@@ -1,7 +1,7 @@
 import { db } from "@healosbench/db";
 import { runs, caseResults, attempts, metricsPerField } from "@healosbench/db/schema/eval";
-import { extract, getPromptHash, STRATEGIES } from "@healosbench/llm";
-import { eq, and } from "drizzle-orm";
+import { extract, getPromptHash, STRATEGIES, estimateCost } from "@healosbench/llm";
+import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { Semaphore } from "../utils/semaphore.js";
 import { runEvents } from "../utils/events.js";
@@ -89,7 +89,7 @@ async function processPendingCases(runId: string, force: boolean) {
 
         while (true) {
           try {
-            result = await extract(goldCase.transcript, run.strategy as Strategy);
+            result = await extract(goldCase.transcript, run.strategy as Strategy, { model: run.model });
             break;
           } catch (err: any) {
             if (err?.status === 429 && retries < maxRetries) {
@@ -168,11 +168,17 @@ async function processPendingCases(runId: string, force: boolean) {
 
         // Accumulate tokens on Run
         if (result.tokens) {
-          // A somewhat coarse way: Drizzle atomic update or fetch-then-update
-          // For now, simpler: we will just aggregate at the end or use atomic SQL increments
-          // Since SQLite/PG supports atomic increments, we can do:
-          // await db.execute(sql`UPDATE runs SET input_tokens = input_tokens + ${...}`)
-          // We'll skip precise token aggregation per case for this snippet to keep it robust
+          const addedCost = estimateCost(result.tokens);
+          await db
+            .update(runs)
+            .set({
+              input_tokens: sql`${runs.input_tokens} + ${result.tokens.input_tokens}`,
+              output_tokens: sql`${runs.output_tokens} + ${result.tokens.output_tokens}`,
+              cache_read_tokens: sql`${runs.cache_read_tokens} + ${result.tokens.cache_read_input_tokens || 0}`,
+              cache_write_tokens: sql`${runs.cache_write_tokens} + ${result.tokens.cache_creation_input_tokens || 0}`,
+              cost_usd: sql`${runs.cost_usd} + ${addedCost}`,
+            })
+            .where(eq(runs.id, runId));
         }
 
         runEvents.emit(`case_completed:${runId}`, {
@@ -241,6 +247,11 @@ export async function startRun(opts: StartRunOpts): Promise<{ run_id: string }> 
     model: opts.model,
     prompt_hash: promptHash,
     status: "running",
+    input_tokens: 0,
+    output_tokens: 0,
+    cache_read_tokens: 0,
+    cache_write_tokens: 0,
+    cost_usd: "0",
   });
 
   const dataset = await listCases();
